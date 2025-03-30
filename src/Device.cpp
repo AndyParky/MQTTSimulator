@@ -1,5 +1,5 @@
-#include "../include/Device.h"
-#include "../include/Broker.h"
+#include "Device.h"
+#include "Broker.h"
 #include <algorithm>
 #include <random>
 #include <sstream>
@@ -99,7 +99,7 @@ namespace mqtt {
     void Device::generateTelemetry() {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> interval_var(100, 500);
+        std::uniform_int_distribution<> interval_var(mqtt::constants::TELEMETRY_RANDOM_MIN_MS, mqtt::constants::TELEMETRY_RANDOM_MAX_MS);
 
         while (running) {
             // Generate and publish telemetry
@@ -117,10 +117,10 @@ namespace mqtt {
         std::mt19937 gen(rd());
 
         // Generate random sensor values
-        std::uniform_real_distribution<> temp(15.0, 30.0);
-        std::uniform_real_distribution<> humidity(30.0, 80.0);
-        std::uniform_real_distribution<> pressure(990.0, 1020.0);
-        std::uniform_real_distribution<> battery(3.0, 4.2);
+        std::uniform_real_distribution<> temp(mqtt::constants::TEMPERATURE_MIN, mqtt::constants::TEMPERATURE_MAX);
+        std::uniform_real_distribution<> humidity(mqtt::constants::HUMIDITY_MIN, mqtt::constants::HUMIDITY_MAX);
+        std::uniform_real_distribution<> pressure(mqtt::constants::PRESSURE_MIN, mqtt::constants::PRESSURE_MAX);
+        std::uniform_real_distribution<> battery(mqtt::constants::BATTERY_MIN, mqtt::constants::BATTERY_MAX);
 
         // Create JSON-like output
         std::stringstream ss;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Message.h"
+#include "Constants.h"
 #include <string>
 #include <vector>
 #include <queue>
@@ -26,7 +27,7 @@ namespace mqtt {
          */
         Device(const std::string& id,
             std::shared_ptr<Broker> broker,
-            std::chrono::milliseconds interval = std::chrono::milliseconds(1000));
+            std::chrono::milliseconds interval = std::chrono::milliseconds(mqtt::constants::GATEWAY_INTERVAL_MS));
 
         /**
          * @brief Destroy the Device object
@@ -78,7 +79,7 @@ namespace mqtt {
 
         // For visualization
         std::vector<Message> message_history;
-        const size_t MAX_HISTORY_SIZE = 50;
+        const size_t MAX_HISTORY_SIZE = mqtt::constants::DEVICE_MESSAGE_HISTORY_SIZE;
     };
 
 } // namespace mqtt

@@ -7,6 +7,16 @@ namespace mqtt {
     namespace constants {
 
         //-------------------------------------------------------------------------
+        // Window Settings
+        //-------------------------------------------------------------------------
+
+		// Default window width
+		constexpr int DEFAULT_WINDOW_WIDTH = 1280;
+
+        // Default window height
+        constexpr int DEFAULT_WINDOW_HEIGHT = 800;
+
+        //-------------------------------------------------------------------------
         // Message history settings
         //-------------------------------------------------------------------------
 

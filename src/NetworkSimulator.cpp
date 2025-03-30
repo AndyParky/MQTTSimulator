@@ -1,7 +1,7 @@
-#include "../include/NetworkSimulator.h"
-#include "../include/Broker.h"
-#include "../include/Device.h"
-#include "../include/Visualization.h"
+#include "NetworkSimulator.h"
+#include "Broker.h"
+#include "Device.h"
+#include "Visualization.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -48,10 +48,10 @@ std::shared_ptr<mqtt::Device> NetworkSimulator::addDevice(
 
 void NetworkSimulator::setupInitialDevices() {
     // Add a set of standard devices for demonstration
-    addDevice("sensor_temp", std::chrono::milliseconds(2000));
-    addDevice("sensor_humidity", std::chrono::milliseconds(3000));
-    addDevice("actuator_valve", std::chrono::milliseconds(5000));
-    addDevice("gateway", std::chrono::milliseconds(1000));
+    addDevice("sensor_temp", std::chrono::milliseconds(mqtt::constants::TEMP_SENSOR_INTERVAL_MS));
+    addDevice("sensor_humidity", std::chrono::milliseconds(mqtt::constants::HUMIDITY_SENSOR_INTERVAL_MS));
+    addDevice("actuator_valve", std::chrono::milliseconds(mqtt::constants::VALVE_ACTUATOR_INTERVAL_MS));
+    addDevice("gateway", std::chrono::milliseconds(mqtt::constants::GATEWAY_INTERVAL_MS));
 }
 
 //-------------------------------------------------------------------------
@@ -193,8 +193,8 @@ bool NetworkSimulator::initializeGlfwAndImGui() {
 
     // Create window
     window = glfwCreateWindow(
-        DEFAULT_WINDOW_WIDTH,
-        DEFAULT_WINDOW_HEIGHT,
+        mqtt::constants::DEFAULT_WINDOW_WIDTH,
+        mqtt::constants::DEFAULT_WINDOW_HEIGHT,
         DEFAULT_WINDOW_TITLE,
         nullptr,
         nullptr

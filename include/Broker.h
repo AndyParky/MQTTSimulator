@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Message.h"
+#include "Constants.h"
 #include <string>
 #include <map>
 #include <vector>
@@ -63,7 +64,7 @@ namespace mqtt {
 
         // For visualization
         std::vector<Message> message_history;
-        const size_t MAX_HISTORY_SIZE = 100;
+        const size_t MAX_HISTORY_SIZE = mqtt::constants::BROKER_MESSAGE_HISTORY_SIZE;
     };
 
 } // namespace mqtt

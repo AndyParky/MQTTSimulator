@@ -1,6 +1,7 @@
 #include "../Include/NetworkSimulator.h"
 #include <iostream>
 #include <stdexcept>
+#include "Constants.h"
 
 /**
  * @brief Application entry point
@@ -13,10 +14,10 @@ int main(int argc, char** argv) {
         NetworkSimulator simulator;
 
         // Add some initial devices
-        simulator.addDevice("sensor_temp", std::chrono::milliseconds(2000));
-        simulator.addDevice("sensor_humidity", std::chrono::milliseconds(3000));
-        simulator.addDevice("actuator_valve", std::chrono::milliseconds(5000));
-        simulator.addDevice("gateway", std::chrono::milliseconds(1000));
+        simulator.addDevice(mqtt::constants::DEFAULT_TEMP_SENSOR_ID, std::chrono::milliseconds(mqtt::constants::TEMP_SENSOR_INTERVAL_MS));
+        simulator.addDevice(mqtt::constants::DEFAULT_HUMIDITY_SENSOR_ID, std::chrono::milliseconds(mqtt::constants::HUMIDITY_SENSOR_INTERVAL_MS));
+        simulator.addDevice(mqtt::constants::DEFAULT_VALVE_ACTUATOR_ID, std::chrono::milliseconds(mqtt::constants::VALVE_ACTUATOR_INTERVAL_MS));
+        simulator.addDevice(mqtt::constants::DEFAULT_GATEWAY_ID, std::chrono::milliseconds(mqtt::constants::GATEWAY_INTERVAL_MS));
 
         // Initialize and run the simulator
         simulator.initialize();

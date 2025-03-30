@@ -13,14 +13,10 @@ struct GLFWwindow;
 
 // Configuration constants
 namespace {
-    // Window settings
-    constexpr int DEFAULT_WINDOW_WIDTH = 1280;
-    constexpr int DEFAULT_WINDOW_HEIGHT = 800;
+	// Window settings (Window Width and Window Height declared in Constants.h)
     constexpr char DEFAULT_WINDOW_TITLE[] = "MQTT 5.0 Network Simulator";
     constexpr float DEFAULT_CLEAR_COLOR[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 
-    // Device settings
-    constexpr int DEFAULT_TELEMETRY_INTERVAL_MS = 1000;
 }
 
 /**
@@ -56,7 +52,7 @@ public:
     std::shared_ptr<mqtt::Device> addDevice(
         const std::string& device_id,
         std::chrono::milliseconds telemetry_interval =
-        std::chrono::milliseconds(DEFAULT_TELEMETRY_INTERVAL_MS)
+        std::chrono::milliseconds(mqtt::constants::DEFAULT_TELEMETRY_INTERVAL_MS)
     );
 
     /**

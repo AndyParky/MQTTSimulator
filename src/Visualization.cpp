@@ -1,7 +1,7 @@
-#include "../Include/Visualization.h"
-#include "../Include/Broker.h"
-#include "../Include/Device.h"
-#include "../Include/Message.h"
+#include "Visualization.h"
+#include "Broker.h"
+#include "Device.h"
+#include "Message.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
@@ -204,7 +204,7 @@ namespace visualization {
 
         // Calculate positions in a circle around the center
         for (int i = 0; i < num_devices; i++) {
-            float angle = 2 * M_PI * i / num_devices;
+            float angle = static_cast<float>(2 * M_PI * i / num_devices);
             float x = center.x + style::RING_RADIUS * cos(angle);
             float y = center.y + style::RING_RADIUS * sin(angle);
 
@@ -436,7 +436,7 @@ namespace visualization {
             // Regular device-specific commands
             if (ImGui::BeginMenu("Device Commands")) {
                 for (const auto& device : devices) {
-                    std::string suggestion = "command/" + device->getId();
+                    std::string suggestion = mqtt::constants::COMMAND_TOPIC_PREFIX + device->getId();
                     if (ImGui::MenuItem(suggestion.c_str())) {
                         strcpy_s(command_topic, suggestion.c_str());
                     }
@@ -447,7 +447,7 @@ namespace visualization {
             // Common command patterns
             if (ImGui::BeginMenu("Common Patterns")) {
                 if (ImGui::MenuItem("All Devices")) {
-                    strcpy_s(command_topic, "command/all");
+                    strcpy_s(command_topic, mqtt::constants::ALL_DEVICES_TOPIC);
                 }
                 if (ImGui::MenuItem("Group Commands")) {
                     strcpy_s(command_topic, "command/group/+");
@@ -475,13 +475,13 @@ namespace visualization {
         if (broker) {
             broker->publish(message);
             command_sent = true;
-            command_sent_time = ImGui::GetTime();
+            command_sent_time = static_cast<float>(ImGui::GetTime());
         }
     }
 
     void CommandCenter::showCommandStatus() {
         if (command_sent) {
-            float elapsed = ImGui::GetTime() - command_sent_time;
+            float elapsed = static_cast<float>(ImGui::GetTime()) - command_sent_time;
             if (elapsed < style::MESSAGE_FADE_DURATION) {
                 ImGui::SameLine();
                 float alpha = 1.0f - (elapsed / style::MESSAGE_FADE_DURATION);
