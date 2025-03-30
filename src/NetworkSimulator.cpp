@@ -9,6 +9,10 @@
 #include <iostream>
 #include <functional>
 
+//-------------------------------------------------------------------------
+// Constructor / Destructor
+//-------------------------------------------------------------------------
+
 NetworkSimulator::NetworkSimulator()
     : broker(std::make_shared<mqtt::Broker>("main_broker")) {
 }
@@ -17,20 +21,42 @@ NetworkSimulator::~NetworkSimulator() {
     cleanupGlfwAndImGui();
 }
 
-void NetworkSimulator::addDevice(const std::string& device_id,
+//-------------------------------------------------------------------------
+// Device Management
+//-------------------------------------------------------------------------
+
+std::shared_ptr<mqtt::Device> NetworkSimulator::addDevice(
+    const std::string& device_id,
     std::chrono::milliseconds telemetry_interval) {
-    devices.push_back(std::make_shared<mqtt::Device>(device_id, broker, telemetry_interval));
+
+    // Create the device
+    auto device = std::make_shared<mqtt::Device>(device_id, broker, telemetry_interval);
+    devices.push_back(device);
 
     // Subscribe to device-specific command topics
-    devices.back()->subscribe("command/" + device_id);
-    devices.back()->subscribe("command/all");
+    device->subscribe("command/" + device_id);
+    device->subscribe("command/all");
 
     // Add message handler to display received commands
-    devices.back()->addMessageHandler([device_id](const mqtt::Message& msg) {
+    device->addMessageHandler([device_id](const mqtt::Message& msg) {
         std::cout << "Device " << device_id << " received command: "
             << msg.getTopic() << " -> " << msg.getPayload() << std::endl;
         });
+
+    return device;
 }
+
+void NetworkSimulator::setupInitialDevices() {
+    // Add a set of standard devices for demonstration
+    addDevice("sensor_temp", std::chrono::milliseconds(2000));
+    addDevice("sensor_humidity", std::chrono::milliseconds(3000));
+    addDevice("actuator_valve", std::chrono::milliseconds(5000));
+    addDevice("gateway", std::chrono::milliseconds(1000));
+}
+
+//-------------------------------------------------------------------------
+// Lifecycle Management
+//-------------------------------------------------------------------------
 
 void NetworkSimulator::initialize() {
     if (initialized) {
@@ -42,17 +68,13 @@ void NetworkSimulator::initialize() {
         throw std::runtime_error("Failed to initialize GLFW and ImGui");
     }
 
-    // Create UI components
-    auto add_device_callback = [this]() {
-        std::string id = "device_" + std::to_string(devices.size() + 1);
-        addDevice(id);
-        };
+    // Create initial devices if none exist
+    if (devices.empty()) {
+        setupInitialDevices();
+    }
 
-    ui_components.push_back(std::make_unique<visualization::NetworkOverview>(
-        broker, devices, add_device_callback));
-    ui_components.push_back(std::make_unique<visualization::MessageFlow>(broker, devices));
-    ui_components.push_back(std::make_unique<visualization::DeviceDetails>(devices));
-    ui_components.push_back(std::make_unique<visualization::CommandCenter>(broker, devices));
+    // Setup UI components
+    setupUIComponents();
 
     initialized = true;
 }
@@ -64,6 +86,7 @@ void NetworkSimulator::run() {
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
+        // Process events
         glfwPollEvents();
 
         // Start the ImGui frame
@@ -74,19 +97,51 @@ void NetworkSimulator::run() {
         // Render the simulator UI
         renderImGui();
 
-        // Rendering
+        // Finalize rendering
         ImGui::Render();
+
+        // Update framebuffer
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(
+            DEFAULT_CLEAR_COLOR[0],
+            DEFAULT_CLEAR_COLOR[1],
+            DEFAULT_CLEAR_COLOR[2],
+            DEFAULT_CLEAR_COLOR[3]
+        );
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // Render ImGui
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        // Swap buffers
         glfwSwapBuffers(window);
     }
 
     cleanupGlfwAndImGui();
+}
+
+//-------------------------------------------------------------------------
+// UI Rendering
+//-------------------------------------------------------------------------
+
+void NetworkSimulator::setupUIComponents() {
+    // Clear any existing components
+    ui_components.clear();
+
+    // Create device addition callback
+    auto add_device_callback = [this]() {
+        std::string id = "device_" + std::to_string(devices.size() + 1);
+        addDevice(id);
+        };
+
+    // Create UI components
+    ui_components.push_back(std::make_unique<visualization::NetworkOverview>(
+        broker, devices, add_device_callback));
+    ui_components.push_back(std::make_unique<visualization::MessageFlow>(broker, devices));
+    ui_components.push_back(std::make_unique<visualization::DeviceDetails>(devices));
+    ui_components.push_back(std::make_unique<visualization::CommandCenter>(broker, devices));
 }
 
 void NetworkSimulator::renderImGui() {
@@ -101,7 +156,11 @@ void NetworkSimulator::renderImGui() {
         "Command Center"
     };
 
-    for (size_t i = 0; i < ui_components.size(); i++) {
+    // Ensure we don't try to render more components than we have headers
+    const size_t component_count = std::min(ui_components.size(), sizeof(headers) / sizeof(headers[0]));
+
+    // Render each component in its own header section
+    for (size_t i = 0; i < component_count; i++) {
         if (ImGui::CollapsingHeader(headers[i], ImGuiTreeNodeFlags_DefaultOpen)) {
             ui_components[i]->render();
         }
@@ -110,24 +169,47 @@ void NetworkSimulator::renderImGui() {
     ImGui::End();
 }
 
+//-------------------------------------------------------------------------
+// GLFW/ImGui Handling
+//-------------------------------------------------------------------------
+
 bool NetworkSimulator::initializeGlfwAndImGui() {
+    // Set error callback
+    glfwSetErrorCallback([](int error, const char* description) {
+        std::cerr << "GLFW Error " << error << ": " << description << std::endl;
+        });
+
     // Initialize GLFW
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return false;
     }
 
+    // Configure OpenGL context
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    window = glfwCreateWindow(1280, 800, "MQTT 5.0 Network Simulator", nullptr, nullptr);
+    // Create window
+    window = glfwCreateWindow(
+        DEFAULT_WINDOW_WIDTH,
+        DEFAULT_WINDOW_HEIGHT,
+        DEFAULT_WINDOW_TITLE,
+        nullptr,
+        nullptr
+    );
+
     if (!window) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
+        const char* error_description;
+        glfwGetError(&error_description);
+        std::cerr << "Failed to create GLFW window: " <<
+            (error_description ? error_description : "Unknown error") << std::endl;
         glfwTerminate();
         return false;
     }
 
+    // Configure context
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
@@ -136,21 +218,31 @@ bool NetworkSimulator::initializeGlfwAndImGui() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 
+    // Configure ImGui style
     ImGui::StyleColorsDark();
 
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    // Initialize ImGui backends
+    if (!ImGui_ImplGlfw_InitForOpenGL(window, true)) {
+        std::cerr << "Failed to initialize ImGui GLFW backend" << std::endl;
+        return false;
+    }
+
+    if (!ImGui_ImplOpenGL3_Init(glsl_version)) {
+        std::cerr << "Failed to initialize ImGui OpenGL backend" << std::endl;
+        return false;
+    }
 
     return true;
 }
 
 void NetworkSimulator::cleanupGlfwAndImGui() {
     if (window) {
-        // Cleanup
+        // Cleanup ImGui resources
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 
+        // Cleanup GLFW resources
         glfwDestroyWindow(window);
         glfwTerminate();
 

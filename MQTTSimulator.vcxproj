@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Broker.h" />
+    <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\Device.h" />
     <ClInclude Include="include\Message.h" />
     <ClInclude Include="include\NetworkSimulator.h" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Broker.cpp" />
+    <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\Device.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Message.cpp" />
