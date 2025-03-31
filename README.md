@@ -1,6 +1,6 @@
 # MQTT 5.0 Network Simulator
 
-A visual simulator for MQTT 5.0 networks with real-time messaging visualization using Dear ImGui.
+A visual simulator for MQTT 5.0 IoT networks with real-time messaging visualization using Dear ImGui.
 
 ## Overview
 
