@@ -87,6 +87,13 @@ The object-oriented design makes it easy to extend the simulator:
 - **Real Broker Connection**: Modify the Broker class to connect to an actual MQTT broker
 - **Network Conditions**: Add network condition simulation (latency, packet loss)
 
+## Still to do:
+ - **Add custom JSON packet definitions**: Allow for packet definitions to be specified by an input JSON file.
+ - **Pan/Zoom on network diagram**: Current diagram is fixed - need to add common pan/zoom controls
+ - **Mouseover Status**: Show current status of node on mouseover
+ - **Message Viewer**: Show live message content
+ - **Visual changes to nodes upon command**: Node color or shape should change on specific sent commands.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
