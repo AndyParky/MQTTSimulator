@@ -94,10 +94,6 @@ The object-oriented design makes it easy to extend the simulator:
  - **Message Viewer**: Show live message content
  - **Visual changes to nodes upon command**: Node color or shape should change on specific sent commands.
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Acknowledgments
 
 - [Dear ImGui](https://github.com/ocornut/imgui) for the immediate-mode GUI
