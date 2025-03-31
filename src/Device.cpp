@@ -116,7 +116,7 @@ namespace mqtt {
         std::random_device rd;
         std::mt19937 gen(rd());
 
-        // Generate random sensor values
+        // Generate sensor values
         std::uniform_real_distribution<> temp(mqtt::constants::TEMPERATURE_MIN, mqtt::constants::TEMPERATURE_MAX);
         std::uniform_real_distribution<> humidity(mqtt::constants::HUMIDITY_MIN, mqtt::constants::HUMIDITY_MAX);
         std::uniform_real_distribution<> pressure(mqtt::constants::PRESSURE_MIN, mqtt::constants::PRESSURE_MAX);
