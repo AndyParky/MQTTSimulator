@@ -47,6 +47,7 @@ MQTTSimulator/
 │   ├── Broker.h               # MQTT Broker class
 │   ├── NetworkSimulator.h     # Network Simulator class
 │   └── Visualization.h        # UI components
+│   └── Constants.h            # Project Constants
 ├── Source/                    # Implementation files
 │   ├── Message.cpp            # Message implementation
 │   ├── Device.cpp             # Device implementation
@@ -54,6 +55,7 @@ MQTTSimulator/
 │   ├── NetworkSimulator.cpp   # NetworkSimulator implementation
 │   ├── Visualization.cpp      # Visualization implementation
 │   └── main.cpp               # Application entry point
+│   └── Constants.cpp          # Project Constants
 └── ThirdParty/                # External libraries
     ├── imgui/                 # Dear ImGui library
     └── glfw/                  # GLFW library
