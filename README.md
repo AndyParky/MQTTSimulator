@@ -88,6 +88,7 @@ The object-oriented design makes it easy to extend the simulator:
 - **Network Conditions**: Add network condition simulation (latency, packet loss)
 
 ## Still to do:
+ - **Additional Unit Testing**: Need to expand unit testing. Diagnose and fix errors with VS2022 project file linking to test project
  - **Add custom JSON packet definitions**: Allow for packet definitions to be specified by an input JSON file. Allow for flexibility in schema definitions.
  - **Pan/Zoom on network diagram**: Current diagram is fixed - need to add common pan/zoom controls
  - **Mouseover Status**: Show current status of node on mouseover
