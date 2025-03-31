@@ -1,4 +1,4 @@
-#include "../Include/NetworkSimulator.h"
+#include "NetworkSimulator.h"
 #include <iostream>
 #include <stdexcept>
 #include "Constants.h"
