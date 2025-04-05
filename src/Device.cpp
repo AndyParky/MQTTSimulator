@@ -47,7 +47,7 @@ namespace mqtt {
             Message message(topic, payload, qos, retained);
             message.setSenderId(device_id);
 
-            // Add to history for visualization
+            // Add to history - visualization
             {
                 std::lock_guard<std::mutex> lock(mutex);
                 message_history.push_back(message);
@@ -64,13 +64,13 @@ namespace mqtt {
         std::lock_guard<std::mutex> lock(mutex);
         received_messages.push(message);
 
-        // Add to history for visualization
+        // Add to history - visualization
         message_history.push_back(message);
         if (message_history.size() > MAX_HISTORY_SIZE) {
             message_history.erase(message_history.begin());
         }
 
-        // Process message with registered handlers
+        // Process message w/ handlers
         for (const auto& handler : message_handlers) {
             handler(message);
         }
@@ -102,11 +102,11 @@ namespace mqtt {
         std::uniform_int_distribution<> interval_var(mqtt::constants::TELEMETRY_RANDOM_MIN_MS, mqtt::constants::TELEMETRY_RANDOM_MAX_MS);
 
         while (running) {
-            // Generate and publish telemetry
+            // Create and publish telemetry
             std::string telemetry = generateRandomTelemetry();
             publish("telemetry/" + device_id, telemetry, QoS::AT_LEAST_ONCE);
 
-            // Random variation in telemetry timing for realism
+            // Insert random variation in telemetry
             std::this_thread::sleep_for(telemetry_interval +
                 std::chrono::milliseconds(interval_var(gen)));
         }
@@ -122,7 +122,7 @@ namespace mqtt {
         std::uniform_real_distribution<> pressure(mqtt::constants::PRESSURE_MIN, mqtt::constants::PRESSURE_MAX);
         std::uniform_real_distribution<> battery(mqtt::constants::BATTERY_MIN, mqtt::constants::BATTERY_MAX);
 
-        // Create JSON-like output
+        // Create "JSON-ish" output
         std::stringstream ss;
         ss << "{"
             << "\"temperature\":" << std::fixed << std::setprecision(1) << temp(gen) << ","

@@ -29,15 +29,15 @@ std::shared_ptr<mqtt::Device> NetworkSimulator::addDevice(
     const std::string& device_id,
     std::chrono::milliseconds telemetry_interval) {
 
-    // Create the device
+    // Create device
     auto device = std::make_shared<mqtt::Device>(device_id, broker, telemetry_interval);
     devices.push_back(device);
 
-    // Subscribe to device-specific command topics
+    // Subscribe to command topics
     device->subscribe("command/" + device_id);
     device->subscribe("command/all");
 
-    // Add message handler to display received commands
+    // Message handler to display received commands
     device->addMessageHandler([device_id](const mqtt::Message& msg) {
         std::cout << "Device " << device_id << " received command: "
             << msg.getTopic() << " -> " << msg.getPayload() << std::endl;
@@ -47,7 +47,7 @@ std::shared_ptr<mqtt::Device> NetworkSimulator::addDevice(
 }
 
 void NetworkSimulator::setupInitialDevices() {
-    // Add a set of standard devices for demonstration
+    // Add devices
     addDevice("sensor_temp", std::chrono::milliseconds(mqtt::constants::TEMP_SENSOR_INTERVAL_MS));
     addDevice("sensor_humidity", std::chrono::milliseconds(mqtt::constants::HUMIDITY_SENSOR_INTERVAL_MS));
     addDevice("actuator_valve", std::chrono::milliseconds(mqtt::constants::VALVE_ACTUATOR_INTERVAL_MS));
@@ -68,7 +68,7 @@ void NetworkSimulator::initialize() {
         throw std::runtime_error("Failed to initialize GLFW and ImGui");
     }
 
-    // Create initial devices if none exist
+    // Create initial devices
     if (devices.empty()) {
         setupInitialDevices();
     }
@@ -127,7 +127,7 @@ void NetworkSimulator::run() {
 //-------------------------------------------------------------------------
 
 void NetworkSimulator::setupUIComponents() {
-    // Clear any existing components
+    // Clear all components
     ui_components.clear();
 
     // Create device addition callback
@@ -148,7 +148,7 @@ void NetworkSimulator::renderImGui() {
     // Main window
     ImGui::Begin("MQTT 5.0 Network Simulator");
 
-    // Render UI components in collapsing headers
+    // Collapsing headers
     const char* headers[] = {
         "Network Overview",
         "Message Flow",
@@ -156,10 +156,10 @@ void NetworkSimulator::renderImGui() {
         "Command Center"
     };
 
-    // Ensure we don't try to render more components than we have headers
+    // Test if there's more component than headers
     const size_t component_count = std::min(ui_components.size(), sizeof(headers) / sizeof(headers[0]));
 
-    // Render each component in its own header section
+    // Render each component in single header section
     for (size_t i = 0; i < component_count; i++) {
         if (ImGui::CollapsingHeader(headers[i], ImGuiTreeNodeFlags_DefaultOpen)) {
             ui_components[i]->render();
@@ -211,7 +211,7 @@ bool NetworkSimulator::initializeGlfwAndImGui() {
 
     // Configure context
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+    glfwSwapInterval(1); 
 
     // Setup ImGui
     IMGUI_CHECKVERSION();

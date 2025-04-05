@@ -30,22 +30,20 @@ namespace visualization {
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
 
-        // Calculate center position
+        // Calculate center position, draw broker in center
         ImVec2 center_pos(canvas_pos.x + canvas_size.x / 2, canvas_pos.y + 70);
-
-        // Draw broker in the center
         drawBroker(draw_list, center_pos);
 
-        // Calculate device positions and cache them
+        // Cache device positions
         std::map<std::string, ImVec2> device_positions = calculateDevicePositions(center_pos);
 
-        // Draw all devices
+        // Draw devices
         for (const auto& device : devices) {
             const auto& device_id = device->getId();
             drawDevice(draw_list, device_id, device_positions[device_id]);
         }
 
-        // Get messages to display (last N messages)
+        // Get messages, display
         const auto& all_messages = broker->getMessageHistory();
         size_t msg_count = all_messages.size();
         size_t start_idx = (msg_count > style::MAX_VISIBLE_MESSAGES) ?
@@ -56,12 +54,11 @@ namespace visualization {
             const auto& msg = all_messages[i];
             float alpha = 0.2f + 0.8f * ((i - start_idx) / static_cast<float>(msg_count - start_idx));
 
-            // Get start and end positions
+            // Start and end positions
             bool is_publish = !msg.getSenderId().empty();
             ImVec2 start_pos = getPosition(msg.getSenderId(), device_positions, center_pos);
             ImVec2 end_pos = getPosition(msg.getTargetId(), device_positions, center_pos);
 
-            // Draw the message
             drawMessage(draw_list, msg, start_pos, end_pos, alpha);
         }
 
@@ -82,10 +79,8 @@ namespace visualization {
     }
 
     void MessageFlow::drawDevice(ImDrawList* draw_list, const std::string& id, ImVec2 position) {
-        // Draw device circle
+		// Draw circle represnting the device, and label
         draw_list->AddCircleFilled(position, style::DEVICE_RADIUS, style::DEVICE_COLOR);
-
-        // Prepare label (truncate if needed)
         std::string label = id;
         if (label.length() > 8) {
             label = label.substr(0, 6) + "..";
@@ -102,7 +97,7 @@ namespace visualization {
 
     void MessageFlow::drawMessage(ImDrawList* draw_list, const mqtt::Message& msg,
         ImVec2 start, ImVec2 end, float alpha) {
-        // Determine if this is a publish or subscribe message
+		// Is public or suscribe message?
         bool is_publish = !msg.getSenderId().empty();
 
         // Calculate color with alpha
@@ -116,39 +111,35 @@ namespace visualization {
                 ImColor(style::SUBSCRIBE_COLOR).Value.z * 255,
                 255 * alpha);
 
-        // Draw the connection line
+        // Draw connection line
         draw_list->AddLine(start, end, color, style::LINE_THICKNESS);
 
-        // Draw the direction arrow
+        // Draw direction arrow
         drawMessageArrow(draw_list, start, end, color,
             is_publish ? style::BROKER_RADIUS : style::DEVICE_RADIUS,
             is_publish);
 
-        // Draw the topic
+        // Draw topic
         ImVec2 mid_point((start.x + end.x) / 2, (start.y + end.y) / 2);
         drawMessageTopic(draw_list, msg.getTopic(), mid_point, alpha);
     }
 
     void MessageFlow::drawMessageArrow(ImDrawList* draw_list, ImVec2 start, ImVec2 end,
         ImU32 color, float radius, bool is_publish) {
-        // Calculate direction vector
+        // Calculate direction vector, normalize
         ImVec2 dir(end.x - start.x, end.y - start.y);
         float dist = sqrt(dir.x * dir.x + dir.y * dir.y);
-
-        // Normalize direction
         dir.x /= dist;
         dir.y /= dist;
 
-        // Calculate arrow position (offset from end point)
+		// Find arrow position, normal vector perpendicular to direction
         ImVec2 arrow_pos(
             start.x + dir.x * (dist - radius - 10),
             start.y + dir.y * (dist - radius - 10)
         );
-
-        // Calculate normal vector (perpendicular to direction)
         ImVec2 norm(-dir.y, dir.x);
 
-        // Draw a triangle for the arrowhead
+        // Draw arrowhead triangle
         draw_list->AddTriangleFilled(
             ImVec2(arrow_pos.x, arrow_pos.y),
             ImVec2(arrow_pos.x - dir.x * style::ARROW_SIZE + norm.x * style::ARROW_SIZE,
@@ -197,12 +188,12 @@ namespace visualization {
         std::map<std::string, ImVec2> positions;
         int num_devices = static_cast<int>(devices.size());
 
-        // Edge case: no devices
+        // Cases: no devices
         if (num_devices == 0) {
             return positions;
         }
 
-        // Calculate positions in a circle around the center
+        // find positions around circle
         for (int i = 0; i < num_devices; i++) {
             float angle = static_cast<float>(2 * M_PI * i / num_devices);
             float x = center.x + style::RING_RADIUS * cos(angle);
@@ -210,16 +201,13 @@ namespace visualization {
 
             positions[devices[i]->getId()] = ImVec2(x, y);
         }
-
         return positions;
     }
-
+    // Return default position (broker) if ID is empty
     ImVec2 MessageFlow::getPosition(const std::string& id, const std::map<std::string, ImVec2>& positions, ImVec2 default_pos) {
-        // If ID is empty or not found, return the default position (broker)
         if (id.empty() || positions.find(id) == positions.end()) {
             return default_pos;
         }
-
         return positions.at(id);
     }
 
@@ -229,7 +217,7 @@ namespace visualization {
     }
 
     void DeviceDetails::render() {
-        // Search filter input
+        // Search input filter
         ImGui::Text("Search:");
         ImGui::SameLine();
         if (ImGui::InputText("##DeviceSearch", search_buffer, IM_ARRAYSIZE(search_buffer))) {
@@ -238,14 +226,14 @@ namespace visualization {
 
         ImGui::Separator();
 
-        // Device selector with filtering
+        // Select device with filter
         if (ImGui::BeginCombo("Select Device", selected_device >= 0 ?
             devices[selected_device]->getId().c_str() : "None")) {
 
             for (int i = 0; i < static_cast<int>(devices.size()); i++) {
                 const auto& device_id = devices[i]->getId();
 
-                // Apply filter if any
+                // Apply filter
                 if (!search_filter.empty() &&
                     device_id.find(search_filter) == std::string::npos) {
                     continue;
@@ -268,12 +256,12 @@ namespace visualization {
     void DeviceDetails::renderDeviceInfo(const std::shared_ptr<mqtt::Device>& device) {
         ImGui::Text("Device ID: %s", device->getId().c_str());
 
-        // Show subscribed topics in a collapsing section
+        // Collapsing section of subscribed topics
         if (ImGui::CollapsingHeader("Subscriptions", ImGuiTreeNodeFlags_DefaultOpen)) {
             renderSubscriptions(device);
         }
 
-        // Show message history in a collapsing section
+        // Show message history
         if (ImGui::CollapsingHeader("Message History", ImGuiTreeNodeFlags_DefaultOpen)) {
             renderMessageHistory(device);
         }
@@ -287,11 +275,11 @@ namespace visualization {
             return;
         }
 
-        // Display each topic with a bullet point
+		// Show each topic with bullet points
         for (const auto& topic : topics) {
             ImGui::BulletText("%s", topic.c_str());
 
-            // Add tooltip with more info
+            // Tooltip on hover
             if (ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
                 ImGui::Text("Topic: %s", topic.c_str());
@@ -325,7 +313,7 @@ namespace visualization {
         int visible_count = 0;
 
         for (const auto& msg : messages) {
-            // Determine if this is incoming or outgoing
+            // See if incoming or outgoing
             bool is_incoming = !msg.getTargetId().empty();
 
             // Apply filters
@@ -365,7 +353,7 @@ namespace visualization {
                 msg.getTopic().c_str(),
                 msg.getPayload().substr(0, 30).c_str());
 
-            // Add detailed tooltip when hovering
+            // Detailed tooltip when hovering
             if (ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
                 ImGui::Text("Topic: %s", msg.getTopic().c_str());
@@ -378,7 +366,7 @@ namespace visualization {
             ImGui::PopStyleColor();
         }
 
-        // If no messages are visible, show a message
+		// Show message if none visible
         if (visible_count == 0) {
             ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
                 "No messages match the current filters");
@@ -394,7 +382,7 @@ namespace visualization {
     }
 
     void CommandCenter::render() {
-        // Topic input with right-click suggestions
+        // Right-click suggestions for topic input
         ImGui::InputText("Topic", command_topic, IM_ARRAYSIZE(command_topic));
 
         // Show topic suggestions on right-click
@@ -402,14 +390,14 @@ namespace visualization {
             ImGui::OpenPopup("TopicSuggestions");
         }
 
-        // Draw the suggestions popup
+        // Draw suggestions popup
         showTopicSuggestions();
 
         // Payload input
         ImGui::InputTextMultiline("Payload", command_payload, IM_ARRAYSIZE(command_payload),
             ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 3));
 
-        // QoS selection
+        // QoS 
         const char* qos_items[] = {
             "QoS 0 (At most once)",
             "QoS 1 (At least once)",
@@ -425,7 +413,6 @@ namespace visualization {
             sendCommand();
         }
 
-        // Show success message if needed
         showCommandStatus();
     }
 
@@ -433,7 +420,7 @@ namespace visualization {
         if (ImGui::BeginPopup("TopicSuggestions")) {
             ImGui::Text("Common Topics:");
 
-            // Regular device-specific commands
+            // Device-specific commands
             if (ImGui::BeginMenu("Device Commands")) {
                 for (const auto& device : devices) {
                     std::string suggestion = mqtt::constants::COMMAND_TOPIC_PREFIX + device->getId();
@@ -444,7 +431,7 @@ namespace visualization {
                 ImGui::EndMenu();
             }
 
-            // Common command patterns
+            // Command patterns
             if (ImGui::BeginMenu("Common Patterns")) {
                 if (ImGui::MenuItem("All Devices")) {
                     strcpy_s(command_topic, mqtt::constants::ALL_DEVICES_TOPIC);
@@ -463,15 +450,15 @@ namespace visualization {
     }
 
     void CommandCenter::sendCommand() {
-        // Create a message with the current settings
+        // Create a message with current settings
         mqtt::Message message(command_topic, command_payload,
             static_cast<mqtt::QoS>(command_qos), command_retained);
         message.setSenderId("command_center");
 
-        // Add timestamp and other properties
+        // Add timestamp
         message.setContentType("text/plain");
 
-        // Publish the message through the broker
+        // Publish message through broker
         if (broker) {
             broker->publish(message);
             command_sent = true;
@@ -516,7 +503,7 @@ namespace visualization {
     }
 
     void NetworkOverview::renderBrokerInfo() {
-        // Broker status and information
+        // Broker status & information
         bool is_active = broker->getMessageHistory().size() > 0;
 
         ImGui::Text("Broker: ");
@@ -530,21 +517,21 @@ namespace visualization {
     }
 
     void NetworkOverview::renderDeviceControls() {
-        // Device count and add button
+        // Device count, "add" button
         ImGui::Text("Devices: %zu", devices.size());
 
         if (ImGui::Button("Add Device")) {
             add_device_callback();
         }
 
-        // Show device type selector for future implementation
+        // Show device type selector - future implementation
         ImGui::SameLine();
         static int device_type = 0;
         const char* device_types[] = { "Generic Device", "Sensor", "Actuator", "Gateway" };
         ImGui::SetNextItemWidth(150);
         ImGui::Combo("##DeviceType", &device_type, device_types, IM_ARRAYSIZE(device_types));
 
-        // Display connected devices in a table
+        // table of connected devices
         if (!devices.empty() && ImGui::BeginTable("DevicesTable", 3,
             ImGuiTableFlags_Borders |
             ImGuiTableFlags_RowBg)) {
@@ -560,7 +547,7 @@ namespace visualization {
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("%s", device->getId().c_str());
 
-                // Device type (placeholder for future implementation)
+                // Device type (TODO: placeholder for future implementation)
                 ImGui::TableSetColumnIndex(1);
                 if (device->getId().find("sensor") != std::string::npos) {
                     ImGui::Text("Sensor");
@@ -575,7 +562,7 @@ namespace visualization {
                     ImGui::Text("Generic");
                 }
 
-                // Device status (based on message history)
+                // Device status (based on history)
                 ImGui::TableSetColumnIndex(2);
                 if (device->getMessageHistory().empty()) {
                     ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "Inactive");
@@ -606,10 +593,9 @@ namespace visualization {
         size_t total_sub = 0;
         float message_rate = 0.0f;
 
-        // Calculate statistics
+        // Calculate and display statistics
         calculateStatistics(total_pub, total_sub, message_rate);
 
-        // Display statistics
         ImGui::Text("Statistics:");
         ImGui::Indent();
 
@@ -619,7 +605,7 @@ namespace visualization {
         if (message_rate > 0.0f) {
             ImGui::Text("Messaging Rate: %.1f msg/sec", message_rate);
 
-            // Show a small histogram of message rates
+            // Show histogram of message rates
             static float rate_history[60] = { 0 };
             static int rate_history_offset = 0;
 
@@ -634,10 +620,10 @@ namespace visualization {
                 rate_max = std::max(rate_max, rate_history[i]);
             }
 
-            // Ensure we have a valid range
+            // Ensure valid range
             if (rate_max == rate_min) rate_max = rate_min + 1.0f;
 
-            // Plot the histogram
+            // Plot histogram
             ImGui::PlotLines("##RateHistory", rate_history, IM_ARRAYSIZE(rate_history),
                 rate_history_offset, "msg/sec", rate_min, rate_max, ImVec2(200, 50));
         }
@@ -653,12 +639,12 @@ namespace visualization {
 
         std::unordered_map<std::string, int> topic_counts;
 
-        // Count messages per topic
+        // Count messages/topic
         for (const auto& msg : broker->getMessageHistory()) {
             topic_counts[msg.getTopic()]++;
         }
 
-        // Sort topics by message count
+        // Sort by message count
         std::vector<std::pair<std::string, int>> sorted_topics(topic_counts.begin(), topic_counts.end());
         std::sort(sorted_topics.begin(), sorted_topics.end(),
             [](const auto& a, const auto& b) { return a.second > b.second; });
@@ -671,7 +657,7 @@ namespace visualization {
 
             ImGui::Text("%s: %d msgs (%.1f%%)", topic_data.first.c_str(), topic_data.second, percentage);
 
-            // Add a simple bar graph
+            // Bar graph
             ImGui::SameLine(250);
             ImGui::ProgressBar(percentage / 100.0f, ImVec2(100, 8), "");
         }

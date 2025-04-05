@@ -10,10 +10,10 @@
  */
 int main(int argc, char** argv) {
     try {
-        // Create the network simulator
+        // Create network simulator
         NetworkSimulator simulator;
 
-        // Add some initial devices
+        // Add initial devices
         simulator.addDevice(mqtt::constants::DEFAULT_TEMP_SENSOR_ID, std::chrono::milliseconds(mqtt::constants::TEMP_SENSOR_INTERVAL_MS));
         simulator.addDevice(mqtt::constants::DEFAULT_HUMIDITY_SENSOR_ID, std::chrono::milliseconds(mqtt::constants::HUMIDITY_SENSOR_INTERVAL_MS));
         simulator.addDevice(mqtt::constants::DEFAULT_VALVE_ACTUATOR_ID, std::chrono::milliseconds(mqtt::constants::VALVE_ACTUATOR_INTERVAL_MS));
