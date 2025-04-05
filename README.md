@@ -1,6 +1,6 @@
 # MQTT 5.0 Network Simulator
 
-A visual simulator for MQTT 5.0 networks with real-time messaging visualization using Dear ImGui.
+A visual simulator for MQTT 5.0 IoT networks with real-time messaging visualization using Dear ImGui.
 
 ## Overview
 
@@ -47,6 +47,7 @@ MQTTSimulator/
 │   ├── Broker.h               # MQTT Broker class
 │   ├── NetworkSimulator.h     # Network Simulator class
 │   └── Visualization.h        # UI components
+│   └── Constants.h            # Project Constants
 ├── Source/                    # Implementation files
 │   ├── Message.cpp            # Message implementation
 │   ├── Device.cpp             # Device implementation
@@ -54,6 +55,7 @@ MQTTSimulator/
 │   ├── NetworkSimulator.cpp   # NetworkSimulator implementation
 │   ├── Visualization.cpp      # Visualization implementation
 │   └── main.cpp               # Application entry point
+│   └── Constants.cpp          # Project Constants
 └── ThirdParty/                # External libraries
     ├── imgui/                 # Dear ImGui library
     └── glfw/                  # GLFW library
@@ -88,7 +90,8 @@ The object-oriented design makes it easy to extend the simulator:
 - **Network Conditions**: Add network condition simulation (latency, packet loss)
 
 ## Still to do:
- - **Add custom JSON packet definitions**: Allow for packet definitions to be specified by an input JSON file.
+ - **Additional Unit Testing**: Need to expand unit testing. Diagnose and fix errors with VS2022 project file linking to test project
+ - **Add custom JSON packet definitions**: Allow for packet definitions to be specified by an input JSON file. Allow for flexibility in schema definitions.
  - **Pan/Zoom on network diagram**: Current diagram is fixed - need to add common pan/zoom controls
  - **Mouseover Status**: Show current status of node on mouseover
  - **Message Viewer**: Show live message content
