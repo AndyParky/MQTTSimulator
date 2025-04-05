@@ -23,14 +23,14 @@ namespace mqtt {
     class Device : public std::enable_shared_from_this<Device> {
     public:
         /**
-         * @brief Construct a new Device object
+         * @brief Construct Device object
          */
         Device(const std::string& id,
             std::shared_ptr<Broker> broker,
             std::chrono::milliseconds interval = std::chrono::milliseconds(mqtt::constants::GATEWAY_INTERVAL_MS));
 
         /**
-         * @brief Destroy the Device object
+         * @brief Destroy Device object
          */
         ~Device();
 

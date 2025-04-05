@@ -68,7 +68,7 @@ namespace mqtt {
         QoS qos;
         bool retained;
         std::string sender_id;
-        std::string target_id; // For visualization purposes
+        std::string target_id; 
         std::chrono::system_clock::time_point timestamp;
 
         // MQTT 5.0 specific properties

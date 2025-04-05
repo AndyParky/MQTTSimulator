@@ -59,9 +59,8 @@ public:
      * @brief Initialize the simulator
      *
      * Sets up GLFW, ImGui, and creates initial UI components.
-     * This must be called before run().
      *
-     * @throws std::runtime_error If initialization fails
+     * @throws std::runtime_error If fail
      */
     void initialize();
 
@@ -69,7 +68,6 @@ public:
      * @brief Run the simulation
      *
      * Starts the main event loop and handles rendering.
-     * initialize() must be called before this method.
      */
     void run();
 
@@ -84,7 +82,7 @@ private:
     /**
      * @brief Set up initial devices for the simulation
      *
-     * Creates a standard set of devices for demonstration.
+     * Creates standard set of devices
      */
     void setupInitialDevices();
 
@@ -98,7 +96,7 @@ private:
     /**
      * @brief Initialize GLFW and ImGui
      *
-     * @return bool True if initialization succeeded
+     * @return True if succeeded
      */
     bool initializeGlfwAndImGui();
 
@@ -108,7 +106,7 @@ private:
     void cleanupGlfwAndImGui();
 
 private:
-    // Core simulation components
+    // Simulation components
     std::shared_ptr<mqtt::Broker> broker;
     std::vector<std::shared_ptr<mqtt::Device>> devices;
 

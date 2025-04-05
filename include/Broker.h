@@ -31,17 +31,17 @@ namespace mqtt {
          */
         ~Broker();
 
-        // Delete copy and move constructors/operators
+		// Remove copy/delete constructors and assignment operators
         Broker(const Broker&) = delete;
         Broker& operator=(const Broker&) = delete;
         Broker(Broker&&) = delete;
         Broker& operator=(Broker&&) = delete;
 
-        // Subscription management
+        // Manage subscirptions 
         void subscribe(const std::string& topic, std::shared_ptr<Device> device);
         void unsubscribe(const std::string& topic, std::shared_ptr<Device> device);
 
-        // Message handling
+        // Handle messages
         void publish(const Message& message);
 
         // Accessors

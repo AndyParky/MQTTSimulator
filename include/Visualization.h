@@ -84,7 +84,7 @@ namespace visualization {
     };
 
     /**
-     * @brief DeviceDetails visualization component
+     * @brief DeviceDetails visualization 
      */
     class DeviceDetails : public UIComponent {
     public:
@@ -103,7 +103,7 @@ namespace visualization {
     };
 
     /**
-     * @brief CommandCenter visualization component
+     * @brief CommandCenter visualization 
      */
     class CommandCenter : public UIComponent {
     public:
@@ -127,7 +127,7 @@ namespace visualization {
     };
 
     /**
-     * @brief NetworkOverview visualization component
+     * @brief NetworkOverview visualization 
      */
     class NetworkOverview : public UIComponent {
     public:
