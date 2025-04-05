@@ -20,8 +20,7 @@ namespace mqtt {
     void Broker::subscribe(const std::string& topic, std::shared_ptr<Device> device) {
         std::lock_guard<std::mutex> lock(mutex);
         topic_subscriptions[topic].push_back(device);
-
-        // Send any retained messages that match the subscription
+        // Send messages that match
         for (const auto& retained : retained_messages) {
             if (topicMatches(topic, retained.first)) {
                 device->receiveMessage(retained.second);
@@ -42,19 +41,21 @@ namespace mqtt {
     }
 
     void Broker::publish(const Message& message) {
-        std::lock_guard<std::mutex> lock(mutex);
-        message_queue.push(message);
-
-        // Store retained messages
-        if (message.isRetained()) {
-            retained_messages[message.getTopic()] = message;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            message_queue.push(message);
+            // Store messages
+            if (message.isRetained()) {
+                retained_messages[message.getTopic()] = message;
+            }
+            // Add to history
+            message_history.push_back(message);
+            if (message_history.size() > MAX_HISTORY_SIZE) {
+                message_history.erase(message_history.begin());
+            }
         }
-
-        // Add to history for visualization
-        message_history.push_back(message);
-        if (message_history.size() > MAX_HISTORY_SIZE) {
-            message_history.erase(message_history.begin());
-        }
+        // Notify processing thread
+        // message_condition.notify_one(); TODO: notify processing thread of message
     }
 
     const std::vector<Message>& Broker::getMessageHistory() const {
@@ -67,19 +68,16 @@ namespace mqtt {
 
     void Broker::processMessages() {
         while (running) {
-            Message message;
-            {
+            Message message;    {
                 std::lock_guard<std::mutex> lock(mutex);
                 if (!message_queue.empty()) {
                     message = message_queue.front();
                     message_queue.pop();
                 }
             }
-
             if (!message.getTopic().empty()) {
                 distributeMessage(message);
             }
-
             std::this_thread::sleep_for(std::chrono::milliseconds(mqtt::constants::MESSAGE_PROCESSING_INTERVAL_MS));
         }
     }
@@ -101,12 +99,10 @@ namespace mqtt {
     }
 
     bool Broker::topicMatches(const std::string& subscription, const std::string& topic) {
-        // Exact match
         if (subscription == topic) {
             return true;
         }
-
-        // Handle single-level wildcard +
+        // Single-level wildcard +
         if (subscription.find('+') != std::string::npos) {
             std::string sub_regex = subscription;
             size_t pos = 0;
@@ -114,18 +110,14 @@ namespace mqtt {
                 sub_regex.replace(pos, 1, "[^/]+");
                 pos += 5;
             }
-
-            // Very basic regex matching - not efficient but works for demo
+            // regex matching
             return std::regex_match(topic, std::regex(sub_regex));
         }
-
-        // Handle multi-level wildcard #
+        // Multi-level wildcard #
         if (subscription.back() == '#') {
             std::string prefix = subscription.substr(0, subscription.length() - 1);
             return topic.substr(0, prefix.length()) == prefix;
         }
-
         return false;
     }
-
 } // namespace mqtt
